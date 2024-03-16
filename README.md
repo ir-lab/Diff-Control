@@ -9,6 +9,8 @@ While imitation learning provides a simple and effective framework for policy le
 <img src = "img/controlnet.png" width ="800" />
 </p>
 
+
+We summarize our contributions as: 
 1. Add Bayesian guarantee for diffusion-based polices using ControlNet structure as a transition model to ensure consistent action generation.
 2. Show the advantage of Diff-Control in performing dynamic and temporal sensitive tasks with at least 10% and 48% success rate improvements.
 3. Empirically demonstrate Diff-Control Policy can perform on a wide range of tasks including high-precision tasks with at least 31% success rate improvement.
