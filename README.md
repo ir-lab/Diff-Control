@@ -1,8 +1,11 @@
 # Diff-Control: A Stateful Diffusion-based Policy for Imitation Learning
 This repo is the official implementation of ["Diff-Control: A Stateful Diffusion-based Policy for Imitation Learning"](https://diff-control.github.io/static/videos/Diff-Control.pdf) by Xiao Liu, Yifan Zhou, Fabian Weigend, Shubham Sonawani, Shuhei Ikemoto, and Heni Ben Amor. The project website is [here](https://diff-control.github.io/).
+
+
 <p align="center">
 <img src = "img/diff-control-policy.gif" width ="800" />
 </p>
+
 
 While imitation learning provides a simple and effective framework for policy learning, acquiring consistent action during robot execution remains a challenging task. Existing approaches primarily focus on either modifying the action representation at data curation stage or altering the model itself, both of which do not fully address the scalability of consistent action generation. To overcome this limitation, we introduce the Diff-Control policy, which utilizes a diffusion-based model to learn action representation from a state-space modeling viewpoint. We demonstrate that diffusion-based policies can acquire statefulness through a Bayesian formulation facilitated by ControlNet, leading to improved robustness and success rates. Our experimental results demonstrate the significance of incorporating action statefulness in policy learning, where Diff-Control shows improved performance across various tasks. Specifically, Diff-Control achieves an average success rate of 72% and 84% on stateful and dynamic tasks, respectively. Notably, Diff-Control also shows consistent performance in the presence of perturbations, outperforming other state-of-the-art methods that falter under similar conditions. 
 <p align="center">
