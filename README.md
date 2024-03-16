@@ -1,4 +1,4 @@
-# α-MDF: An Attention-based Multimodal Differentiable Filter for Robot State Estimation
+# Diff-Control: A Stateful Diffusion-based Policy for Imitation Learning
 This repo is the official implementation of ["Diff-Control: A Stateful Diffusion-based Policy for Imitation Learning"](https://diff-control.github.io/static/videos/Diff-Control.pdf) by Xiao Liu, Yifan Zhou, Fabian Weigend, Shubham Sonawani, Shuhei Ikemoto, and Heni Ben Amor. The project website is [here](https://diff-control.github.io/).
 <p align="center">
 <img src = "img/diff-control-policy.gif" width ="800" />
@@ -15,17 +15,22 @@ While imitation learning provides a simple and effective framework for policy le
 4. Diff-Control policy exhibits notable precision and robustness against perturbations, achieving at least a 30% higher success rate compared to state-of-the-art methods.
 
 ## Getting Started
-We provide implementation using `Pytorch`. Clone the repo `git clone https://github.com/ir-lab/alpha-MDF.git` and then there are two options for running the code.
+We provide implementation using `Pytorch`. Clone the repo `git clone https://github.com/ir-lab/Diff-Control.git` and then there are two options for running the code.
 
 #### 1. Python Scripts
 
-Intall [PyTorch](https://pytorch.org/get-started/previous-versions/) and then set up the environment using `pip install -r requirements.txt`. Make sure to have corresponding libraries and dependencies installed on your local environment, i.e., we use PyTorch 1.8.0 with cuda11.1.
+Intall [PyTorch](https://pytorch.org/get-started/previous-versions/) and then set up the environment using `pip install -r requirements.txt`. Make sure to have corresponding libraries and dependencies installed on your local environment, i.e., we use PyTorch 1.11.0 with cuda11.3.
 
-For training or testing, Go to `./latent_space` and then Run 
+For training or testing, Go to `./Diff-Control` and then Run 
 
 ```
-python train.py --config ./config/xxx.yaml
+python train.py --config ./config/duck_diffusion.yaml
 ```
+or run
+```
+python train.py --config ./config/duck_controlnet.yaml
+```
+Note that Diff-Control assume you have already trained a diffusion model as the base policy.
 
 #### 2. docker workflow
 Edit the `conf.sh` file to set the environment variables used to start the docker 
@@ -37,11 +42,11 @@ CONTAINER_NAME=UR5  # name of the docker container.
 DATASET_PATH=/home/xiao/datasets/  # Dataset path on the host machine.
 CUDA_VISIBLE_DEVICES=0  # comma-separated list of GPU's to set visible.
 ```
-Build the docker image by running `./build.sh`.
+Build the docker image by running `./build/build.sh`.
 
 
 ##### Training or testing
-Create or a modify a yaml file found in `./latent_space/config/xxx.yaml`, and set the mode parameter to perform the training or testing routine. 
+Create or a modify a yaml file found in `./Diff-Control/config/duck_controlnet.yaml`, and set the mode parameter to perform the training or testing routine. 
 
 ```
 mode:
@@ -51,7 +56,7 @@ mode:
 Run the training and test script using the bash file `./run_filter.sh $CONFIG_FILE` 
 where `$CONFIG_FILE` is the path to the config file.  
 ```shell
-`./run_filter.sh ./config/xxx.yaml`
+`./run_filter.sh ./config/duck_controlnet.yaml`
 ```
 View the logs with `docker logs -f $CONTAINER_NAME`
 
