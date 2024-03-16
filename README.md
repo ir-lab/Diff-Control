@@ -92,12 +92,7 @@ The top two rows depict the language-conditioned kitchen task, where the Diff-Co
 
 
 ## Datasets
-#### Tomato
-(Yifan: yzhou298@asu.edu)
-#### Open Lid
-(Yifan: yzhou298@asu.edu)
-#### Duck
-(Yifan: yzhou298@asu.edu)
+The datasets used in the experiments can be found in this [link](https://www.dropbox.com/scl/fo/2onj92s7gewettu1rjg3d/h?rlkey=1d4dnhwf3z6s4a51lopgocby5&dl=0).
 
 ## Citation
 * Please cite the paper if you used any materials from this repo, Thanks.
