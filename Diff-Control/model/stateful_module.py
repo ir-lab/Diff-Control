@@ -663,7 +663,7 @@ class StatefulControlNet(nn.Module):
         )
 
         self.controlnet_blocks = nn.ModuleList([])
-        for ind, (dim_in, dim_out) in enumerate(in_out):
+        for ind, (dim_in, dim_out) in enumerate(reversed(in_out[1:])):
             is_last = ind >= (num_resolutions - 1)
             self.controlnet_blocks.append(
                 self.zero_module(nn.Conv1d(dim_out * 2, dim_in, 1))
@@ -722,29 +722,34 @@ class StatefulControlNet(nn.Module):
         """
         base model decoder + controlnet feature
         """
-        for resnet, resnet2, upsample in self.ups:
+        for ind, (resnet, resnet2, upsample) in enumerate(self.ups):
             # print("---")
             x = x + h_hat.pop()
             x = torch.cat((x, h.pop()), dim=1)
+            x_hat = self.controlnet_blocks[ind](x)
             # print(x.shape)
             x = resnet(x, t)
             # print(x.shape)
             x = resnet2(x, t)
+            x = x + x_hat
             # print(x.shape)
             x = upsample(x)
+
             # print(x.shape)
         x_out = self.final_conv(x)
         return x_out
 
 
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # # # state = action = [bs, en, time, dim_x]
 # time = 24
 # dim_x = 10
-# state = torch.randn(64, dim_x, time)
-# t_input = torch.randn(64)
-# img = torch.randn(64, 3, 224, 224)
-# lang = torch.randn(64, 512)
-# img_emb = torch.randn(64, 256)
+# state = torch.randn(64, dim_x, time).to(device)
+# t_input = torch.randn(64).to(device)
+# img = torch.randn(64, 3, 224, 224).to(device)
+# lang = torch.randn(64, 512).to(device)
+# img_emb = torch.randn(64, 256).to(device)
+
 # # state = rearrange(state, "bs en dim time -> (bs en) dim time")
 
 # # sensor_Model = SensorModel(state_est=1, dim_x=10, emd_size=256, input_channel=3)
@@ -755,5 +760,6 @@ class StatefulControlNet(nn.Module):
 # # # out = mini_emb(lang)
 
 # model = StatefulControlNet(dim_x=dim_x, window_size=time)
+# model.cuda()
 # x = model(state, img_emb, lang, state, t_input)
 # print("out shape ", x.shape)
