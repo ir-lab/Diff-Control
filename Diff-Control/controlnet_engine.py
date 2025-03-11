@@ -1,11 +1,4 @@
-import argparse
-import logging
-import os
-import numpy as np
-import torch
-import torch.nn as nn
-from einops import rearrange, repeat
-import clip
+from dataset.square_ph import SquarePhDataset
 from model import (
     UNetwithControl,
     SensorModel,
@@ -14,24 +7,22 @@ from model import (
     StatefulUNet,
 )
 from dataset.lid_pick_and_place import *
-from dataset.tomato_pick_and_place import *
+#from config.tomato_pick_and_place import *
 from dataset.pick_duck import *
 from dataset.drum_hit import *
 from optimizer import build_optimizer
 from optimizer import build_lr_scheduler
 from torch.utils.tensorboard import SummaryWriter
-import copy
 import time
-import random
 import pickle
 
-from diffusers.schedulers.scheduling_ddpm import DDPMScheduler
+#from diffusers.schedulers.scheduling_ddpm import DDPMScheduler
+from diffusers import DDPMScheduler
 from diffusers.training_utils import EMAModel
-from diffusers.optimization import get_scheduler
 
 
 class Engine:
-    def __init__(self, args, logger):
+    def __init__(self, args, logger, diff_pol_dataset=None):
         self.args = args
         self.logger = logger
         self.batch_size = self.args.train.batch_size
@@ -61,13 +52,19 @@ class Engine:
                 self.data_path = self.args.train.data_path
             else:
                 self.data_path = self.args.test.data_path
-            self.dataset = Tomato(self.data_path)
+            #self.dataset = Tomato(self.data_path)
         elif self.args.train.dataset == "Duck":
             if self.mode == "train":
                 self.data_path = self.args.train.data_path
             else:
                 self.data_path = self.args.test.data_path
             self.dataset = Duck(self.data_path)
+        elif self.args.train.dataset == "SquarePhDataset":
+            if self.mode == "train":
+                self.data_path = self.args.train.data_path
+            else:
+                self.data_path = self.args.test.data_path
+            self.dataset = SquarePhDataset(diff_pol_dataset)
         elif self.args.train.dataset == "Drum":
             if self.mode == "train":
                 self.data_path = self.args.train.data_path
@@ -208,7 +205,8 @@ class Engine:
             batch_size=self.batch_size,
             shuffle=True,
             num_workers=8,
-            collate_fn=tomato_pad_collate_xy_lang,
+            #collate_fn=tomato_pad_collate_xy_lang,
+            collate_fn=pad_collate_xy_lang,
         )
         pytorch_total_params = sum(
             p.numel() for p in self.model.parameters() if p.requires_grad
@@ -398,7 +396,7 @@ class Engine:
                 self.data_path = self.args.train.data_path
             else:
                 self.data_path = self.args.test.data_path
-            test_dataset = Tomato(self.data_path)
+            #test_dataset = Tomato(self.data_path)
         elif self.args.train.dataset == "Duck":
             if self.mode == "train":
                 self.data_path = self.args.train.data_path

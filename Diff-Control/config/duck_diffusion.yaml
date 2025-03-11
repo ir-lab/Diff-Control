@@ -23,8 +23,8 @@ train:
     input_size_2: ''
     input_size_3: ''
     data_path: [
-        '/tf/datasets/pick_duck/pick_duck_1',
-        '/tf/datasets/pick_duck/pick_duck_2',
+        '/home/ssdArray/datasets/diff_control_data/pick_duck/pick_duck_1',
+        '/home/ssdArray/datasets/diff_control_data/pick_duck/pick_duck_2'
     ]
     batch_size: 64
     num_epochs: 3000
@@ -45,7 +45,7 @@ test:
     win_size: 24
     model_name: 'duck_diffusion'
     data_path: [
-        '/tf/datasets/pick_duck/pick_duck_2',
+        '/home/ssdArray/datasets/diff_control_data/pick_duck/pick_duck_2'
     ]
     sensor_len: 2
     channel_img_1: 3

@@ -1,24 +1,13 @@
-import argparse
-import logging
-import os
-import numpy as np
-import torch
-import torch.nn as nn
-from einops import rearrange, repeat
-import clip
 from model import UNetwithControl, SensorModel
 from dataset.tomato_pick_and_place import *
 from optimizer import build_optimizer
 from optimizer import build_lr_scheduler
 from torch.utils.tensorboard import SummaryWriter
-import copy
 import time
-import random
 import pickle
 
 from diffusers.schedulers.scheduling_ddpm import DDPMScheduler
 from diffusers.training_utils import EMAModel
-from diffusers.optimization import get_scheduler
 
 
 class Engine:

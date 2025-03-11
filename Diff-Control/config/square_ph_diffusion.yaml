@@ -1,0 +1,176 @@
+mode:
+  mode: 'train'
+  model_zoo: 'diffusion-model'
+  multiprocessing_distributed: False
+  dist_url: tcp://127.0.0.1:2345
+  num_threads: 1
+  do_online_eval: True
+  parameter_path: ''
+train:
+  dim_x: 10
+  dim_z: ''
+  dim_a: 10
+  dim_gt: 10
+  num_ensemble: 32
+  win_size: 24
+  seed: 0
+  model_name: 'square_ph_diffusion'
+  dataset: 'SquarePhDataset'
+  sensor_len: 2
+  channel_img_1: 3
+  channel_img_2: ''
+  input_size_1: 77
+  input_size_2: ''
+  input_size_3: ''
+  #data_path: [
+  # '/home/ssdArray/datasets/diff_control_data/pick_duck/pick_duck_1',
+  # '/home/ssdArray/datasets/diff_control_data/pick_duck/pick_duck_2'
+  #]
+  data_path: /home/ssdArray/datasets/diffusion_policy_data/robomimic/robomimic/datasets/square/ph/image_abs.hdf5
+  batch_size: 64
+  num_epochs: 3000
+  learning_rate: 1e-4
+  weight_decay: 1e-6
+  adam_eps: 1e-3
+  log_freq: 10
+  eval_freq: 200
+  save_freq: 200
+  log_directory: './experiments'
+  loss: 'mse'
+task:
+  abs_action: true
+  dataset:
+    _target_: diffusion_policy.dataset.robomimic_replay_image_dataset.RobomimicReplayImageDataset
+    abs_action: true
+    dataset_path: /home/ssdArray/datasets/diffusion_policy_data/robomimic/robomimic/datasets/square/ph/image_abs.hdf5
+    horizon: 24 # was 16 originally
+    n_obs_steps: 2
+    pad_after: 7
+    pad_before: 1
+    rotation_rep: rotation_6d
+    seed: 42
+    shape_meta:
+      action:
+        shape:
+          - 10
+      obs:
+        agentview_image:
+          shape:
+            - 3
+            - 84
+            - 84
+          type: rgb
+        robot0_eef_pos:
+          shape:
+            - 3
+        robot0_eef_quat:
+          shape:
+            - 4
+        robot0_eye_in_hand_image:
+          shape:
+            - 3
+            - 84
+            - 84
+          type: rgb
+        robot0_gripper_qpos:
+          shape:
+            - 2
+    use_cache: true
+    val_ratio: 0.02
+  dataset_path: /home/ssdArray/datasets/diffusion_policy_data/robomimic/robomimic/datasets/square/ph/image_abs.hdf5
+  dataset_type: ph
+  env_runner:
+    _target_: diffusion_policy.env_runner.robomimic_image_runner.RobomimicImageRunnerSquarePh
+    abs_action: true
+    crf: 22
+    dataset_path: /home/ssdArray/datasets/diffusion_policy_data/robomimic/robomimic/datasets/square/ph/image_abs.hdf5
+    fps: 10
+    max_steps: 400
+    n_action_steps: 8
+    n_envs: 28
+    n_obs_steps: 2
+    n_test: 50
+    n_test_vis: 4
+    n_train: 6
+    n_train_vis: 2
+    past_action: false
+    render_obs_key: agentview_image
+    shape_meta:
+      action:
+        shape:
+          - 10
+      obs:
+        agentview_image:
+          shape:
+            - 3
+            - 84
+            - 84
+          type: rgb
+        robot0_eef_pos:
+          shape:
+            - 3
+        robot0_eef_quat:
+          shape:
+            - 4
+        robot0_eye_in_hand_image:
+          shape:
+            - 3
+            - 84
+            - 84
+          type: rgb
+        robot0_gripper_qpos:
+          shape:
+            - 2
+    test_start_seed: 100000
+    tqdm_interval_sec: 1.0
+    train_start_idx: 0
+  name: square_image
+  shape_meta:
+    action:
+      shape:
+        - 10
+    obs:
+      agentview_image:
+        shape:
+          - 3
+          - 84
+          - 84
+        type: rgb
+      robot0_eef_pos:
+        shape:
+          - 3
+      robot0_eef_quat:
+        shape:
+          - 4
+      robot0_eye_in_hand_image:
+        shape:
+          - 3
+          - 84
+          - 84
+        type: rgb
+      robot0_gripper_qpos:
+        shape:
+          - 2
+test:
+  dim_x: 10
+  dim_z: ''
+  dim_a: 10
+  dim_gt: 10
+  num_ensemble: 32
+  win_size: 24
+  model_name: 'square_ph_diffusion'
+  data_path: [
+    '/home/ssdArray/datasets/diff_control_data/pick_duck/pick_duck_2'
+  ]
+  sensor_len: 2
+  channel_img_1: 3
+  channel_img_2: ''
+  input_size_1: 77
+  input_size_2: ''
+  input_size_3: ''
+  checkpoint_path_1: ''
+  checkpoint_path_2: ''
+  dataset: 'SquarePhDataset'
+optim:
+  optim: 'adamw'
+  lr_scheduler: 'polynomial_decay'
