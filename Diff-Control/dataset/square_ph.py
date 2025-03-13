@@ -8,7 +8,8 @@ class SquarePhDataset(torch.utils.data.Dataset):
         self.square_ph_dataset = square_ph_dataset
         self.image_size = image_size
 
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu"
+                                   )
         self.clip_model, _ = clip.load("ViT-B/32", device=self.device)
         self.dummy_sentence = "push the square to its goal"
         self.transform = transforms.Resize(self.image_size)

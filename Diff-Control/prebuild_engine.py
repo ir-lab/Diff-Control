@@ -1,3 +1,6 @@
+import cv2
+import wandb
+
 from dataset.square_ph import SquarePhDataset
 from diffusion_policy.policy.base_image_policy import BaseImagePolicy
 from model import UNetwithControl, SensorModel, StatefulUNet
@@ -16,7 +19,7 @@ from diffusers.training_utils import EMAModel
 
 
 class Engine(BaseImagePolicy):
-    def __init__(self, args, logger, diff_pol_dataset=None):
+    def __init__(self, args, logger, diff_pol_dataset=None, env_runner=None):
         super().__init__()
         self.args = args
         self.logger = logger
@@ -35,6 +38,7 @@ class Engine(BaseImagePolicy):
         self.win_size = self.args.train.win_size
         self.global_step = 0
         self.mode = self.args.mode.mode
+        self.env_runner = env_runner
 
         if self.args.train.dataset == "OpenLid":
             if self.mode == "train":
@@ -141,7 +145,6 @@ class Engine(BaseImagePolicy):
             p.numel() for p in self.model.parameters() if p.requires_grad
         )
         print("Total number of parameters: ", pytorch_total_params)
-
 
         test_dataloader = torch.utils.data.DataLoader(
             self.test_dataset, batch_size=self.batch_size, shuffle=True, num_workers=8
@@ -292,6 +295,23 @@ class Engine(BaseImagePolicy):
                     ),
                 )
 
+            if self.global_step != 0:
+                runner_log = self.env_runner.run(self)
+                videos = {k: v for k, v in runner_log.items() if isinstance(v, wandb.Video)}
+                for k, v in videos:
+                    cap = cv2.VideoCapture(v._path)
+                    frames = []
+                    while cap.isOpened():
+                        ret, frame = cap.read()
+                        if not ret:
+                            break
+                        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # Convert from OpenCV BGR to RGB
+                        frames.append(frame)
+                    cap.release()
+                    video_tensor = torch.tensor(np.array(frames), dtype=torch.float32).permute(0, 3, 1, 2) / 255.0
+                    # Add batch dimension (1, T, C, H, W)
+                    video_tensor = video_tensor.unsqueeze(0)
+                    self.writer.add_video(k, video_tensor, self.global_step, fps=10)
             # online evaluation
             if (
                 self.args.mode.do_online_eval
@@ -357,8 +377,8 @@ class Engine(BaseImagePolicy):
         pass
 
     def predict_action(self, obs_dict):
-        images = obs_dict["images"]
-        sentence = obs_dict["sentence"]
+        images = obs_dict["image"]
+        sentence = obs_dict["sentence"].to(self.device).unsqueeze(0)
 
         with torch.no_grad():
             text_features = self.clip_model.encode_text(sentence)
