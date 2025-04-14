@@ -1,6 +1,6 @@
 mode:
   mode: 'train'
-  model_zoo: 'diffusion-model'
+  model_zoo: 'controlnet'
   multiprocessing_distributed: False
   dist_url: tcp://127.0.0.1:2345
   num_threads: 1
@@ -14,7 +14,7 @@ train:
   num_ensemble: 32
   win_size: 24
   seed: 0
-  model_name: 'square_ph_diffusion'
+  model_name: 'square_ph_controlnet'
   dataset: 'SquarePhDataset'
   sensor_len: 2
   channel_img_1: 3
@@ -158,7 +158,7 @@ test:
   dim_gt: 10
   num_ensemble: 32
   win_size: 24
-  model_name: 'square_ph_diffusion'
+  model_name: 'square_ph_controlnet'
   data_path: [
     '/home/ssdArray/datasets/diff_control_data/pick_duck/pick_duck_2'
   ]
@@ -168,8 +168,8 @@ test:
   input_size_1: 77
   input_size_2: ''
   input_size_3: ''
-  checkpoint_path_1: ''
-  checkpoint_path_2: ''
+  checkpoint_path_1: './experiments/square_ph_diffusion/v1.0-ema-model-104000'
+  checkpoint_path_2: './experiments/square_ph_diffusion/v1.0-sensor_model-104000'
   dataset: 'SquarePhDataset'
 optim:
   optim: 'adamw'

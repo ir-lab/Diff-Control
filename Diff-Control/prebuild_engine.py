@@ -146,9 +146,10 @@ class Engine(BaseImagePolicy):
         )
         print("Total number of parameters: ", pytorch_total_params)
 
-        test_dataloader = torch.utils.data.DataLoader(
-            self.test_dataset, batch_size=self.batch_size, shuffle=True, num_workers=8
-        )
+        if self.env_runner:
+            test_dataloader = torch.utils.data.DataLoader(
+                self.test_dataset, batch_size=1, shuffle=True, num_workers=8
+            )
 
         # Create optimizer
         optimizer_ = build_optimizer(
@@ -265,8 +266,8 @@ class Engine(BaseImagePolicy):
                     scheduler.step(self.global_step)
 
             # Save a model based of a chosen save frequency
-            #if self.global_step != 0 and (epoch + 1) % self.args.train.save_freq == 0:
-            if self.global_step != 0:
+            if self.global_step != 0 and (epoch + 1) % self.args.train.save_freq == 0:
+            #if self.global_step != 0:
                 self.ema_nets = self.model
                 checkpoint = {
                     "global_step": self.global_step,
@@ -295,11 +296,21 @@ class Engine(BaseImagePolicy):
                     ),
                 )
 
-            if self.global_step != 0:
+            if self.global_step != 0 and self.env_runner and (epoch + 1) % self.args.train.eval_freq == 0:
+                print(f"saving step {self.global_step}, epoch: {epoch}")
                 runner_log = self.env_runner.run(self)
+                test_mean_score = runner_log['test/mean_score']
+                train_mean_score = runner_log['train/mean_score']
+
+                self.writer.add_scalar(
+                    "test/mean_score", test_mean_score, self.global_step
+                )
+                self.writer.add_scalar(
+                    "train/mean_score", train_mean_score, self.global_step
+                )
                 videos = {k: v for k, v in runner_log.items() if isinstance(v, wandb.Video)}
-                for k, v in videos:
-                    cap = cv2.VideoCapture(v._path)
+                for k in videos:
+                    cap = cv2.VideoCapture(videos[k]._path)
                     frames = []
                     while cap.isOpened():
                         ret, frame = cap.read()
@@ -316,7 +327,7 @@ class Engine(BaseImagePolicy):
             if (
                 self.args.mode.do_online_eval
                 and self.global_step != 0
-                #and (epoch + 1) % self.args.train.eval_freq == 0
+                and (epoch + 1) % 25 == 0
             ):
                 time.sleep(0.1)
                 self.ema_nets = self.model
@@ -358,6 +369,9 @@ class Engine(BaseImagePolicy):
                         val_losses.append(loss.cpu().item())
                     if len(val_losses) > 0:
                         val_loss = torch.mean(torch.tensor(val_losses)).item()
+                        self.writer.add_scalar(
+                            "val_loss", val_loss, self.global_step
+                        )
                         all_val_losses.append((epoch, val_loss))
 
                         ###############################################################
@@ -365,10 +379,11 @@ class Engine(BaseImagePolicy):
                         self.sensor_model.train()
                         self.ema.copy_to(self.ema_nets.parameters())
 
-                if val_loss > previous_val_loss:
-                    return
+                if (epoch + 1) % self.args.train.eval_freq == 0:
+                    if val_loss > previous_val_loss and epoch >= 300:
+                        return
 
-                previous_val_loss = val_loss
+                    previous_val_loss = val_loss
 
             # Update epoch
             epoch += 1
@@ -384,11 +399,13 @@ class Engine(BaseImagePolicy):
             text_features = self.clip_model.encode_text(sentence)
             text_features = text_features.clone().detach()
             text_features = text_features.to(torch.float32)
+            text_features = torch.stack([text_features] * 28, dim=0)
+            text_features = text_features.squeeze(1)
 
             img_emb = self.sensor_model(images)
 
             # initialize action from Guassian noise
-            noisy_action = torch.randn((1, self.dim_x, self.win_size)).to(
+            noisy_action = torch.randn((28, self.dim_x, self.win_size)).to(
                 self.device
             )
 
@@ -397,7 +414,8 @@ class Engine(BaseImagePolicy):
 
             for k in self.noise_scheduler.timesteps:
                 # predict noise
-                t = torch.stack([k]).to(self.device)
+                t = [torch.stack([k]).to(self.device) for _ in range(28)]  # Shape (1,1) per tensor
+                t = torch.cat(t, dim=0)
                 predicted_noise = self.ema_nets(
                     noisy_action, img_emb, text_features, t
                 )
