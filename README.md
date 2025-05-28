@@ -100,10 +100,14 @@ The datasets used in the experiments can be found in this [link](https://www.dro
 ## Citation
 * Please cite the paper if you used any materials from this repo, Thanks.
 ```
-@article{liudiff,
-        title={Diff-Control: A Stateful Diffusion-based Policy for Imitation Learning},
-        author={Liu, Xiao and Zhou, Yifan and Weigend, Fabian and Sonawani, Shubham and Ikemoto, Shuhei and Amor, Heni Ben}
-      }
+@inproceedings{liu2024diff,
+  title={Diff-Control: A Stateful Diffusion-based Policy for Imitation Learning},
+  author={Liu, Xiao and Zhou, Yifan and Weigend, Fabian and Sonawani, Shubham and Ikemoto, Shuhei and Amor, Heni Ben},
+  booktitle={2024 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
+  pages={7453--7460},
+  year={2024},
+  organization={IEEE}
+}
 ```
 ```
 @article{liu2024enabling,
