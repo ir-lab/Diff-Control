@@ -1,0 +1,108 @@
+mode:
+  mode: 'train'
+  model_zoo: 'diffusion-model'
+  multiprocessing_distributed: False
+  dist_url: tcp://127.0.0.1:2345
+  num_threads: 1
+  do_online_eval: True
+  parameter_path: ''
+train:
+  dim_x: 10
+  dim_z: ''
+  dim_a: 10
+  dim_gt: 10
+  num_ensemble: 32
+  win_size: 24
+  seed: 0
+  model_name: 'pusht_diffusion'
+  dataset: 'PushTDataset'
+  sensor_len: 2
+  channel_img_1: 3
+  channel_img_2: ''
+  input_size_1: 77
+  input_size_2: ''
+  input_size_3: ''
+  #data_path: [
+  # '/home/ssdArray/datasets/diff_control_data/pick_duck/pick_duck_1',
+  # '/home/ssdArray/datasets/diff_control_data/pick_duck/pick_duck_2'
+  #]
+  #data_path: /home/ssdArray/datasets/diffusion_policy_data/robomimic/robomimic/datasets/square/ph/image_abs.hdf5
+  data_path: /home/nicolasl/diffusion_imitation_learning/diffusion_policy/data/pusht/pusht_cchi_v7_replay.zarr
+  batch_size: 64
+  num_epochs: 3000
+  learning_rate: 1e-4
+  weight_decay: 1e-6
+  adam_eps: 1e-3
+  log_freq: 10
+  eval_freq: 50
+  save_freq: 50
+  log_directory: './experiments'
+  loss: 'mse'
+task:
+  dataset:
+    _target_: diffusion_policy.dataset.pusht_image_dataset.PushTImageDataset
+    horizon: 24 # was 16
+    max_train_episodes: 90
+    pad_after: 7
+    pad_before: 1
+    seed: 42
+    val_ratio: 0.02
+    zarr_path: data/pusht/pusht_cchi_v7_replay.zarr
+  env_runner:
+    _target_: diffusion_policy.env_runner.pusht_image_runner_diff_ctrl.PushTImageRunnerDiffCtrl
+    fps: 10
+    legacy_test: true
+    max_steps: 300
+    n_action_steps: 8
+    n_envs: null
+    n_obs_steps: 2
+    n_test: 50
+    n_test_vis: 4
+    n_train: 6
+    n_train_vis: 2
+    past_action: false
+    test_start_seed: 100000
+    train_start_seed: 0
+  image_shape:
+    - 3
+    - 96
+    - 96
+  name: pusht_image
+  shape_meta:
+    action:
+      shape:
+        - 2
+    obs:
+      agent_pos:
+        shape:
+          - 2
+        type: low_dim
+      image:
+        shape:
+          - 3
+          - 96
+          - 96
+        type: rgb
+test:
+  dim_x: 10
+  dim_z: ''
+  dim_a: 10
+  dim_gt: 10
+  num_ensemble: 32
+  win_size: 24
+  model_name: 'pusht_diffusion'
+  data_path: [
+    '/home/ssdArray/datasets/diff_control_data/pick_duck/pick_duck_2'
+  ]
+  sensor_len: 2
+  channel_img_1: 3
+  channel_img_2: ''
+  input_size_1: 77
+  input_size_2: ''
+  input_size_3: ''
+  checkpoint_path_1: ''
+  checkpoint_path_2: ''
+  dataset: 'PushTDataset'
+optim:
+  optim: 'adamw'
+  lr_scheduler: 'polynomial_decay'

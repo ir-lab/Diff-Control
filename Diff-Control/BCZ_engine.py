@@ -1,23 +1,12 @@
-import argparse
-import logging
-import os
-import numpy as np
-import torch
-import torch.nn as nn
-from einops import rearrange, repeat
-import clip
 from model import ModAttn_ImageBC
-from dataset import UR5_dataloader
+#from dataset import UR5_dataloader
 from dataset.lid_pick_and_place import *
 from dataset.tomato_pick_and_place import *
 from dataset.pick_duck import *
 from dataset.drum_hit import *
-from optimizer import build_optimizer
 from optimizer import build_lr_scheduler
 from torch.utils.tensorboard import SummaryWriter
-import copy
 import time
-import random
 import pickle
 import torch.optim as optim
 

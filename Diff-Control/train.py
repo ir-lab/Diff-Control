@@ -4,7 +4,7 @@ import os
 import yaml
 from sys import argv
 from config import cfg
-import controlnet_engine, BCZ_engine, BCZ_LSTM_engine, prebuild_engine, tomato_engine
+import controlnet_engine, BCZ_engine, BCZ_LSTM_engine, prebuild_engine#, tomato_engine
 
 # mini_controlnet_engine, BCZ_LSTM_engine
 import warnings
@@ -18,7 +18,7 @@ logging_kwargs = dict(
     style="%",
 )
 logging.basicConfig(**logging_kwargs)
-logger = logging.getLogger("diffusion-pilicy")
+logger = logging.getLogger("diffusion-policy")
 
 
 def parse_args():
@@ -38,43 +38,43 @@ def parse_args():
 
 
 def main():
-    cfg, config_file = parse_args()
-    cfg.freeze()
+    cfg_diff_ctrl, config_file = parse_args()
+    cfg_diff_ctrl.freeze()
     ####### check all the parameter settings #######
-    logger.info("{}".format(cfg))
-    logger.info("check mode - {}".format(cfg.mode.mode))
+    logger.info("{}".format(cfg_diff_ctrl))
+    logger.info("check mode - {}".format(cfg_diff_ctrl.mode.mode))
     # Create directory for logs and experiment name
-    if not os.path.exists(cfg.train.log_directory):
-        os.mkdir(cfg.train.log_directory)
-    if not os.path.exists(os.path.join(cfg.train.log_directory, cfg.train.model_name)):
-        os.mkdir(os.path.join(cfg.train.log_directory, cfg.train.model_name))
+    if not os.path.exists(cfg_diff_ctrl.train.log_directory):
+        os.mkdir(cfg_diff_ctrl.train.log_directory)
+    if not os.path.exists(os.path.join(cfg_diff_ctrl.train.log_directory, cfg_diff_ctrl.train.model_name)):
+        os.mkdir(os.path.join(cfg_diff_ctrl.train.log_directory, cfg_diff_ctrl.train.model_name))
         os.mkdir(
-            os.path.join(cfg.train.log_directory, cfg.train.model_name, "summaries")
+            os.path.join(cfg_diff_ctrl.train.log_directory, cfg_diff_ctrl.train.model_name, "summaries")
         )
     else:
         logger.warning(
             "This logging directory already exists: {}. Over-writing current files".format(
-                os.path.join(cfg.train.log_directory, cfg.train.model_name)
+                os.path.join(cfg_diff_ctrl.train.log_directory, cfg_diff_ctrl.train.model_name)
             )
         )
 
     ####### start the training #######
-    if cfg.mode.model_zoo == "controlnet":
-        train_engine = controlnet_engine.Engine(args=cfg, logger=logger)
-    elif cfg.mode.model_zoo == "diffusion-model":
-        train_engine = prebuild_engine.Engine(args=cfg, logger=logger)
-    elif cfg.mode.model_zoo == "BCZ":
-        train_engine = BCZ_engine.Engine(args=cfg, logger=logger)
-    elif cfg.mode.model_zoo == "BCZ_LSTM":
-        train_engine = BCZ_LSTM_engine.Engine(args=cfg, logger=logger)
-    elif cfg.mode.model_zoo == "tomato-model":
-        train_engine = tomato_engine.Engine(args=cfg, logger=logger)
+    if cfg_diff_ctrl.mode.model_zoo == "controlnet":
+        train_engine = controlnet_engine.Engine(args=cfg_diff_ctrl, logger=logger)
+    elif cfg_diff_ctrl.mode.model_zoo == "diffusion-model":
+        train_engine = prebuild_engine.Engine(args=cfg_diff_ctrl, logger=logger)
+    elif cfg_diff_ctrl.mode.model_zoo == "BCZ":
+        train_engine = BCZ_engine.Engine(args=cfg_diff_ctrl, logger=logger)
+    elif cfg_diff_ctrl.mode.model_zoo == "BCZ_LSTM":
+        train_engine = BCZ_LSTM_engine.Engine(args=cfg_diff_ctrl, logger=logger)
+    elif cfg_diff_ctrl.mode.model_zoo == "tomato-model":
+        train_engine = tomato_engine.Engine(args=cfg_diff_ctrl, logger=logger)
 
-    if cfg.mode.mode == "train":
+    if cfg_diff_ctrl.mode.mode == "train":
         train_engine.train()
-    if cfg.mode.mode == "pretrain":
+    if cfg_diff_ctrl.mode.mode == "pretrain":
         train_engine.train()
-    if cfg.mode.mode == "test":
+    if cfg_diff_ctrl.mode.mode == "test":
         train_engine.test()
 
 
